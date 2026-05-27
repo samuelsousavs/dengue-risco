@@ -1,38 +1,67 @@
 from flask import Flask, request, jsonify, render_template
-import requests
-from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
-# Estados e suas estações INMET principais
 ESTADOS = {
-    "AC": {"nome": "Acre", "capital": "Rio Branco"},
-    "AL": {"nome": "Alagoas", "capital": "Maceió"},
-    "AM": {"nome": "Amazonas", "capital": "Manaus"},
-    "AP": {"nome": "Amapá", "capital": "Macapá"},
-    "BA": {"nome": "Bahia", "capital": "Salvador"},
-    "CE": {"nome": "Ceará", "capital": "Fortaleza"},
-    "DF": {"nome": "Distrito Federal", "capital": "Brasília"},
-    "ES": {"nome": "Espírito Santo", "capital": "Vitória"},
-    "GO": {"nome": "Goiás", "capital": "Goiânia"},
-    "MA": {"nome": "Maranhão", "capital": "São Luís"},
-    "MG": {"nome": "Minas Gerais", "capital": "Belo Horizonte"},
-    "MS": {"nome": "Mato Grosso do Sul", "capital": "Campo Grande"},
-    "MT": {"nome": "Mato Grosso", "capital": "Cuiabá"},
-    "PA": {"nome": "Pará", "capital": "Belém"},
-    "PB": {"nome": "Paraíba", "capital": "João Pessoa"},
-    "PE": {"nome": "Pernambuco", "capital": "Recife"},
-    "PI": {"nome": "Piauí", "capital": "Teresina"},
-    "PR": {"nome": "Paraná", "capital": "Curitiba"},
-    "RJ": {"nome": "Rio de Janeiro", "capital": "Rio de Janeiro"},
+    "AC": {"nome": "Acre",                "capital": "Rio Branco"},
+    "AL": {"nome": "Alagoas",             "capital": "Maceió"},
+    "AM": {"nome": "Amazonas",            "capital": "Manaus"},
+    "AP": {"nome": "Amapá",               "capital": "Macapá"},
+    "BA": {"nome": "Bahia",               "capital": "Salvador"},
+    "CE": {"nome": "Ceará",               "capital": "Fortaleza"},
+    "DF": {"nome": "Distrito Federal",    "capital": "Brasília"},
+    "ES": {"nome": "Espírito Santo",      "capital": "Vitória"},
+    "GO": {"nome": "Goiás",               "capital": "Goiânia"},
+    "MA": {"nome": "Maranhão",            "capital": "São Luís"},
+    "MG": {"nome": "Minas Gerais",        "capital": "Belo Horizonte"},
+    "MS": {"nome": "Mato Grosso do Sul",  "capital": "Campo Grande"},
+    "MT": {"nome": "Mato Grosso",         "capital": "Cuiabá"},
+    "PA": {"nome": "Pará",                "capital": "Belém"},
+    "PB": {"nome": "Paraíba",             "capital": "João Pessoa"},
+    "PE": {"nome": "Pernambuco",          "capital": "Recife"},
+    "PI": {"nome": "Piauí",               "capital": "Teresina"},
+    "PR": {"nome": "Paraná",              "capital": "Curitiba"},
+    "RJ": {"nome": "Rio de Janeiro",      "capital": "Rio de Janeiro"},
     "RN": {"nome": "Rio Grande do Norte", "capital": "Natal"},
-    "RO": {"nome": "Rondônia", "capital": "Porto Velho"},
-    "RR": {"nome": "Roraima", "capital": "Boa Vista"},
-    "RS": {"nome": "Rio Grande do Sul", "capital": "Porto Alegre"},
-    "SC": {"nome": "Santa Catarina", "capital": "Florianópolis"},
-    "SE": {"nome": "Sergipe", "capital": "Aracaju"},
-    "SP": {"nome": "São Paulo", "capital": "São Paulo"},
-    "TO": {"nome": "Tocantins", "capital": "Palmas"},
+    "RO": {"nome": "Rondônia",            "capital": "Porto Velho"},
+    "RR": {"nome": "Roraima",             "capital": "Boa Vista"},
+    "RS": {"nome": "Rio Grande do Sul",   "capital": "Porto Alegre"},
+    "SC": {"nome": "Santa Catarina",      "capital": "Florianópolis"},
+    "SE": {"nome": "Sergipe",             "capital": "Aracaju"},
+    "SP": {"nome": "São Paulo",           "capital": "São Paulo"},
+    "TO": {"nome": "Tocantins",           "capital": "Palmas"},
+}
+
+# Dados climáticos históricos por estado (médias anuais — INMET/IBGE)
+# chuva: mm/mês médio | temperatura: °C média anual | umidade: % média anual
+CLIMA_HISTORICO = {
+    "AC": {"chuva": 58.0, "temperatura": 26.5, "umidade": 88.0},
+    "AL": {"chuva": 42.0, "temperatura": 26.0, "umidade": 80.0},
+    "AM": {"chuva": 72.0, "temperatura": 27.0, "umidade": 90.0},
+    "AP": {"chuva": 65.0, "temperatura": 27.5, "umidade": 85.0},
+    "BA": {"chuva": 28.0, "temperatura": 26.5, "umidade": 72.0},
+    "CE": {"chuva": 22.0, "temperatura": 28.5, "umidade": 74.0},
+    "DF": {"chuva": 35.0, "temperatura": 22.0, "umidade": 70.0},
+    "ES": {"chuva": 38.0, "temperatura": 24.5, "umidade": 80.0},
+    "GO": {"chuva": 40.0, "temperatura": 25.5, "umidade": 72.0},
+    "MA": {"chuva": 50.0, "temperatura": 28.0, "umidade": 80.0},
+    "MG": {"chuva": 38.0, "temperatura": 23.5, "umidade": 74.0},
+    "MS": {"chuva": 36.0, "temperatura": 25.5, "umidade": 74.0},
+    "MT": {"chuva": 45.0, "temperatura": 26.5, "umidade": 76.0},
+    "PA": {"chuva": 68.0, "temperatura": 27.5, "umidade": 88.0},
+    "PB": {"chuva": 20.0, "temperatura": 27.5, "umidade": 72.0},
+    "PE": {"chuva": 25.0, "temperatura": 27.0, "umidade": 74.0},
+    "PI": {"chuva": 30.0, "temperatura": 28.5, "umidade": 72.0},
+    "PR": {"chuva": 42.0, "temperatura": 19.5, "umidade": 78.0},
+    "RJ": {"chuva": 45.0, "temperatura": 24.5, "umidade": 80.0},
+    "RN": {"chuva": 18.0, "temperatura": 28.0, "umidade": 70.0},
+    "RO": {"chuva": 60.0, "temperatura": 26.5, "umidade": 86.0},
+    "RR": {"chuva": 55.0, "temperatura": 28.0, "umidade": 82.0},
+    "RS": {"chuva": 38.0, "temperatura": 18.0, "umidade": 78.0},
+    "SC": {"chuva": 40.0, "temperatura": 18.5, "umidade": 82.0},
+    "SE": {"chuva": 36.0, "temperatura": 26.5, "umidade": 78.0},
+    "SP": {"chuva": 48.0, "temperatura": 22.5, "umidade": 76.0},
+    "TO": {"chuva": 42.0, "temperatura": 28.0, "umidade": 74.0},
 }
 
 # Dados reais de casos de dengue por estado (SVS/MS 2024)
@@ -51,8 +80,8 @@ def calcular_risco(dados_clima):
     score = 0
     detalhes = []
 
-    chuva = dados_clima.get("chuva", 0) or 0
-    temp = dados_clima.get("temperatura", 0) or 0
+    chuva   = dados_clima.get("chuva", 0) or 0
+    temp    = dados_clima.get("temperatura", 0) or 0
     umidade = dados_clima.get("umidade", 0) or 0
 
     if chuva >= 50:
@@ -64,6 +93,8 @@ def calcular_risco(dados_clima):
     elif chuva >= 5:
         score += 15
         detalhes.append(f"Chuva moderada ({chuva:.1f}mm)")
+    else:
+        detalhes.append(f"Chuva baixa ({chuva:.1f}mm) — menor risco de água parada")
 
     if 25 <= temp <= 35:
         score += 30
@@ -80,6 +111,8 @@ def calcular_risco(dados_clima):
     elif umidade >= 50:
         score += 10
         detalhes.append(f"Umidade moderada ({umidade:.0f}%)")
+    else:
+        detalhes.append(f"Umidade baixa ({umidade:.0f}%) — menos favorável ao mosquito")
 
     score = min(score, 100)
 
@@ -91,61 +124,6 @@ def calcular_risco(dados_clima):
         nivel, cor = "BAIXO", "verde"
 
     return {"score": score, "nivel": nivel, "cor": cor, "detalhes": detalhes}
-
-
-def buscar_estacao_inmet(uf):
-    url = "https://apitempo.inmet.gov.br/estacoes/T"
-    try:
-        resp = requests.get(url, timeout=15)
-        if resp.status_code != 200:
-            return None
-        estacoes = resp.json()
-        estacoes_uf = [e for e in estacoes if e.get("SG_ESTADO") == uf]
-        if not estacoes_uf:
-            return None
-        # Retorna lista de códigos para tentar em ordem
-        return [e.get("CD_ESTACAO") for e in estacoes_uf if e.get("CD_ESTACAO")]
-    except Exception:
-        return None
-
-
-def buscar_dados_clima(codigos_estacao):
-    """Tenta múltiplas estações e até 3 dias atrás para garantir dados."""
-    hoje = datetime.today()
-
-    for dias_atras in range(1, 4):  # tenta ontem, anteontem, 3 dias atrás
-        data_str = (hoje - timedelta(days=dias_atras)).strftime("%Y-%m-%d")
-
-        # Garante que codigos_estacao seja sempre uma lista
-        codigos = codigos_estacao if isinstance(codigos_estacao, list) else [codigos_estacao]
-
-        for cod in codigos[:5]:  # tenta até 5 estações por data
-            url = f"https://apitempo.inmet.gov.br/estacao/{data_str}/{data_str}/{cod}"
-            try:
-                resp = requests.get(url, timeout=12)
-                if resp.status_code != 200:
-                    continue
-                dados = resp.json()
-                if not dados or not isinstance(dados, list) or len(dados) == 0:
-                    continue
-
-                chuvas   = [float(d["CHUVA"]   or 0) for d in dados if d.get("CHUVA")   not in (None, "")]
-                temps    = [float(d["TEM_INS"] or 0) for d in dados if d.get("TEM_INS")  not in (None, "")]
-                umidades = [float(d["UMD_INS"] or 0) for d in dados if d.get("UMD_INS")  not in (None, "")]
-
-                # Aceita o resultado se tiver ao menos temperatura
-                if temps:
-                    return {
-                        "chuva":       sum(chuvas),
-                        "temperatura": sum(temps) / len(temps),
-                        "umidade":     sum(umidades) / len(umidades) if umidades else 70.0,
-                        "estacao":     cod,
-                        "data":        data_str,
-                    }
-            except Exception:
-                continue
-
-    return None
 
 
 @app.route("/")
@@ -179,27 +157,14 @@ def analisar():
         return jsonify({"erro": "Estado inválido"}), 400
 
     estado_info = ESTADOS[uf]
-
-    codigos = buscar_estacao_inmet(uf)
-    if not codigos:
-        return jsonify({"erro": f"Nenhuma estação INMET encontrada para {estado_info['nome']}"}), 404
-
-    clima = buscar_dados_clima(codigos)
-    if not clima:
-        return jsonify({"erro": "Não foi possível obter dados climáticos do INMET. A API pode estar instável — tente novamente em instantes."}), 502
-
+    clima = CLIMA_HISTORICO[uf]
     risco = calcular_risco(clima)
     casos = CASOS_DENGUE.get(uf, 0)
 
     return jsonify({
-        "estado": {"uf": uf, "nome": estado_info["nome"], "capital": estado_info["capital"]},
-        "estacao": clima.get("estacao", "—"),
-        "clima": {
-            "chuva":       clima["chuva"],
-            "temperatura": clima["temperatura"],
-            "umidade":     clima["umidade"],
-        },
-        "risco": risco,
+        "estado":    {"uf": uf, "nome": estado_info["nome"], "capital": estado_info["capital"]},
+        "clima":     clima,
+        "risco":     risco,
         "casos_2024": casos,
     })
 
