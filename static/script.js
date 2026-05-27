@@ -76,7 +76,10 @@ function exibirResultado(dados) {
     : "Não disponível";
 
   document.getElementById("resultado-inner").innerHTML = `
-    <div class="res-local">📍 ${estado.nome} — ${estado.capital}</div>
+    <div class="res-local">
+      <i data-lucide="map-pin" style="width:14px;height:14px;margin-right:5px;"></i>
+      ${estado.nome} — ${estado.capital}
+    </div>
 
     <div class="nivel-badge ${risco.cor}">
       <div class="score">${risco.score}</div>
@@ -105,16 +108,17 @@ function exibirResultado(dados) {
 
     ${casos_2024 ? `
     <div class="casos-box">
-      📊 Em 2024, ${estado.nome} registrou <strong>${casosFormatados} casos</strong> confirmados de dengue (SVS/MS)
+      Em 2024, ${estado.nome} registrou <strong>${casosFormatados} casos</strong> confirmados de dengue (SVS/MS)
     </div>` : ""}
   `;
 
   document.getElementById("resultado").classList.remove("hidden");
+  lucide.createIcons();
 }
 
 function mostrarErro(msg) {
   const erroBox = document.getElementById("erro-box");
-  erroBox.textContent = "⚠️ " + msg;
+  erroBox.textContent = msg;
   erroBox.classList.remove("hidden");
 }
 
