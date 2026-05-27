@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DengueX — Monitor de Risco</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#" onclick="mostrarPagina('home')">
+        <!-- Logo: substitua o src pelo arquivo enviado, ex: /static/logo.png -->
+        <img
+          id="logo-img"
+          src="/static/logo.png"
+          alt="DengueX"
+          class="brand-logo"
+          onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';"
+        >
+        <!-- Fallback exibido enquanto a logo não for enviada -->
+        <span id="logo-fallback" class="brand-fallback">🦟</span>
+        <span class="brand-name">DengueX</span>
+      </a>
+      <div class="nav-links">
+        <a href="#" class="nav-link active" data-page="home" onclick="mostrarPagina('home')">Início</a>
+        <a href="#" class="nav-link" data-page="verificar" onclick="mostrarPagina('verificar')">Verificar Região</a>
+        <a href="#" class="nav-link" data-page="ranking" onclick="mostrarPagina('ranking')">Ranking</a>
+      </div>
+      <button class="nav-cta" onclick="mostrarPagina('verificar')">Verificar agora</button>
+    </div>
+  </nav>
+
+  <!-- PÁGINA: HOME -->
+  <div id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-badge">⚠️ Alerta epidemiológico 2024</div>
+      <h1 class="hero-title">Entenda como a dengue<br><span class="highlight">se alastra pelo Brasil</span></h1>
+      <p class="hero-sub">Conheça os fatores climáticos e ambientais que tornam uma região vulnerável à proliferação do <em>Aedes aegypti</em></p>
+      <button class="btn-primary" onclick="mostrarPagina('verificar')">Verificar minha região →</button>
+    </section>
+
+    <section class="explicacao">
+      <h2 class="section-title">Como a dengue se alastra?</h2>
+
+      <div class="cards-grid">
+        <div class="info-card card-agua">
+          <div class="card-icon">💧</div>
+          <h3>Água parada</h3>
+          <p>O mosquito <em>Aedes aegypti</em> deposita seus ovos em qualquer recipiente com água parada — pneus, vasos, calhas, garrafas e até tampinhas. Após chuvas, o número de criadouros aumenta drasticamente.</p>
+          <div class="card-stat">Ovos sobrevivem até <strong>1 ano</strong> secos</div>
+        </div>
+
+        <div class="info-card card-temp">
+          <div class="card-icon">🌡️</div>
+          <h3>Temperatura ideal</h3>
+          <p>Entre 25°C e 35°C, o ciclo de vida do mosquito é acelerado. Em temperaturas mais altas, o vírus da dengue se replica mais rápido dentro do mosquito, aumentando o risco de transmissão.</p>
+          <div class="card-stat">Ciclo completo em <strong>8–10 dias</strong> no calor</div>
+        </div>
+
+        <div class="info-card card-umidade">
+          <div class="card-icon">🌫️</div>
+          <h3>Umidade alta</h3>
+          <p>A umidade relativa do ar acima de 70% prolonga a vida útil do mosquito adulto. Em regiões úmidas e quentes simultaneamente, a combinação é particularmente perigosa para surtos.</p>
+          <div class="card-stat">Mosquito vive até <strong>45 dias</strong> em condições ideais</div>
+        </div>
+
+        <div class="info-card card-chuva">
+          <div class="card-icon">🌧️</div>
+          <h3>Período chuvoso</h3>
+          <p>As chuvas criam novos criadouros e lavam os ovos depositados para locais de difícil acesso. No Brasil, os surtos de dengue coincisão sistematicamente com a estação das chuvas (outubro–abril).</p>
+          <div class="card-stat">Surtos aumentam <strong>3–5×</strong> após chuvas intensas</div>
+        </div>
+
+        <div class="info-card card-urb">
+          <div class="card-icon">🏙️</div>
+          <h3>Urbanização densa</h3>
+          <p>Áreas urbanas com alta densidade populacional e saneamento precário são os principais focos. O mosquito é urbano por natureza — raramente é encontrado em florestas preservadas.</p>
+          <div class="card-stat">95% dos casos ocorrem em <strong>áreas urbanas</strong></div>
+        </div>
+
+        <div class="info-card card-virus">
+          <div class="card-icon">🦠</div>
+          <h3>4 sorotipos</h3>
+          <p>Existem 4 sorotipos do vírus (DENV 1 a 4). Quem já teve dengue por um sorotipo pode ser infectado por outro — e a segunda infecção tende a ser mais grave, com risco de dengue hemorrágica.</p>
+          <div class="card-stat">Dengue grave: risco maior na <strong>reinfecção</strong></div>
+        </div>
+      </div>
+
+      <div class="ciclo-box">
+        <h3>Ciclo de transmissão</h3>
+        <div class="ciclo-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">Mosquito fêmea pica pessoa infectada e adquire o vírus</div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">Vírus se replica no mosquito por 8–12 dias (período extrínseco)</div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">Mosquito infectado pica outra pessoa transmitindo a dengue</div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text">Sintomas aparecem em 4–10 dias: febre alta, dores e manchas</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- PÁGINA: VERIFICAR -->
+  <div id="page-verificar" class="page">
+    <section class="verificar-hero">
+      <h1>Verificar região</h1>
+      <p>Selecione um estado para analisar as condições climáticas atuais e o risco de proliferação do mosquito</p>
+    </section>
+
+    <section class="verificar-content">
+      <div class="select-card">
+        <label for="select-estado">Selecione o estado</label>
+        <select id="select-estado">
+          <option value="">— Escolha um estado —</option>
+        </select>
+        <button id="btn-analisar" class="btn-primary" onclick="analisarEstado()">Analisar risco</button>
+      </div>
+
+      <div id="resultado" class="resultado-card hidden">
+        <div id="resultado-inner"></div>
+      </div>
+
+      <div id="erro-box" class="erro-card hidden"></div>
+    </section>
+  </div>
+
+  <!-- PÁGINA: RANKING -->
+  <div id="page-ranking" class="page">
+    <section class="verificar-hero">
+      <h1>Ranking de casos</h1>
+      <p>Os 15 estados com maior número de casos confirmados de dengue em 2024 — dados do SVS/Ministério da Saúde</p>
+    </section>
+
+    <section class="ranking-content">
+      <div class="chart-card">
+        <canvas id="grafico-ranking" height="420"></canvas>
+      </div>
+      <p class="fonte">Fonte: Sinan/SVS — Ministério da Saúde (2024)</p>
+    </section>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
